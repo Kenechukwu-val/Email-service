@@ -1,5 +1,5 @@
 const express = require('express');
-const emailRoutes = require('./routes/emailRoutes');
+const emailRoutes = require('./routes/email.js');
 
 const app = express();
 
@@ -7,6 +7,6 @@ const app = express();
 app.use(express.json());
 
 // Use email routes
-app.use('/api/emails', emailRoutes);
+app.use('/api', emailRoutes);
 
 module.exports = app;

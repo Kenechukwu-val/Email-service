@@ -6,7 +6,7 @@ function validateEmail(req, res, next) {
     if (!subject) errors.push('Email subject is required.');
 
     if (errors.length > 0) {
-        return res.status(400).json({ error: 'Validation failed', detils: errors });
+        return res.status(400).json({ error: 'Validation failed', details: errors });
     }
 
     next();
