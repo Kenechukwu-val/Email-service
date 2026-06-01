@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Service</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: -apple-system, sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 40px 20px; }
+    .card { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.1); width: 100%; max-width: 480px; }
+    h1 { font-size: 1.5rem; margin-bottom: 24px; }
+    label { display: block; font-size: .875rem; font-weight: 600; margin-bottom: 4px; }
+    input, textarea, select { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: .875rem; margin-bottom: 16px; }
+    textarea { resize: vertical; min-height: 80px; }
+    button { width: 100%; padding: 10px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    button:disabled { opacity: .6; }
+    .msg { margin-top: 16px; padding: 12px; border-radius: 6px; font-size: .875rem; display: none; }
+    .msg.success { display: block; background: #d1fae5; color: #065f46; }
+    .msg.error { display: block; background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Send an Email</h1>
+    <form id="emailForm">
+      <label for="to">To</label>
+      <input type="email" id="to" required>
+
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" required>
+
+      <label for="template">Template</label>
+      <select id="template">
+        <option value="">None (custom HTML/text)</option>
+        <option value="welcome">Welcome</option>
+      </select>
+
+      <div id="dataFields" style="display:none;">
+        <label for="name">Name</label>
+        <input type="text" id="name">
+        <label for="verifyLink">Verify Link</label>
+        <input type="url" id="verifyLink">
+      </div>
+
+      <label for="html">HTML Body</label>
+      <textarea id="html"></textarea>
+
+      <label for="text">Plain Text Body</label>
+      <textarea id="text"></textarea>
+
+      <button type="submit" id="sendBtn">Send</button>
+    </form>
+    <div id="result" class="msg"></div>
+  </div>
+
+  <script>
+    const templateSelect = document.getElementById('template');
+    const dataFields = document.getElementById('dataFields');
+
+    templateSelect.addEventListener('change', () => {
+      dataFields.style.display = templateSelect.value ? 'block' : 'none';
+    });
+
+    document.getElementById('emailForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      const body = {
+        to: document.getElementById('to').value,
+        subject: document.getElementById('subject').value,
+      };
+
+      if (templateSelect.value) {
+        body.template = templateSelect.value;
+        body.data = {
+          name: document.getElementById('name').value,
+          verifyLink: document.getElementById('verifyLink').value,
+        };
+      } else {
+        body.html = document.getElementById('html').value;
+        body.text = document.getElementById('text').value;
+      }
+
+      try {
+        const res = await fetch('/api/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        const result = document.getElementById('result');
+        result.className = 'msg ' + (res.ok ? 'success' : 'error');
+        result.textContent = res.ok ? `Sent! Message ID: ${data.messageId}` : data.error || 'Failed';
+      } catch {
+        const result = document.getElementById('result');
+        result.className = 'msg error';
+        result.textContent = 'Network error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send';
+      }
+    });
+  </script>
+</body>
+</html>
