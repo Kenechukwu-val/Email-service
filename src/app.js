@@ -1,12 +1,12 @@
 const express = require('express');
+const path = require('path');
 const emailRoutes = require('./routes/email.js');
 
 const app = express();
 
-// Middleware to parse JSON bodies
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Use email routes
 app.use('/api', emailRoutes);
 
 module.exports = app;

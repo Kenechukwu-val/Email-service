@@ -1,6 +1,13 @@
 const transporter = require('../config/email');
+const { welcomeTemplate } = require('../templates/welcome');
 
-async function sendEmail({ to, subject, html, text }) {
+const templates = {
+    welcome: welcomeTemplate,
+}
+
+async function sendEmail({ to, subject, template, data, text }) {
+    const html = templates[template]?.(data);
+    
     const mailOptions = {
         from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
         to,

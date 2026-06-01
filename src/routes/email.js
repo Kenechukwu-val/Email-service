@@ -6,8 +6,8 @@ const router = Router();
 
 router.post('/send', validateEmail, async (req, res) => {
     try {
-        const { to, subject, html, text } = req.body;
-        const info = await sendEmail({ to, subject, html, text });
+        const { to, subject, html, text, template, data } = req.body;
+        const info = await sendEmail({ to, subject, html, text, template, data });
         res.json({ success: true, messageId: info.messageId });
     } catch (error) {
         console.error('Error sending email:', error);
